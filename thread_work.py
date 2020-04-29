@@ -23,6 +23,7 @@ import os
 import psutil
 import warnings
 import random
+import re
 warnings.filterwarnings("ignore")
 
 
@@ -39,6 +40,15 @@ data.loc[1] = ['url','cat','text']
 avg=[]
 
 
+def stop_words_remover(word_tokens): 
+    filtered_sent = [w for w in word_tokens if not w in stop_words] 
+    final = ' '.join(filtered_sent)
+    final = ' '.join([i for i in final if not i.isdigit()])
+    return final
+
+
+
+
 def extract(url):
     warnings.filterwarnings("ignore")
     try:
@@ -50,7 +60,7 @@ def extract(url):
             strips = list(soup.stripped_strings)
             strips = ' '.join(strips)
             strips = strips.replace(',',' ')
-            return strips
+            return stop_words_remover(strips)
         else:
             return "NULL"
     except:
@@ -77,7 +87,7 @@ def extract_link(url):
         s = s.replace(',',' ')
         s = re.sub('[^A-Za-z0-9]+', ' ',s)
         result.append(s)
-    return ' '.join(result)
+    return stop_words_remover(' '.join(result))
 
 
 
@@ -94,10 +104,6 @@ def prepare_url(url):
     urls.append(insecure_scheme+netloc)
     return urls
 
-def stop_words_remover(word_tokens): 
-    filtered_sent = [w for w in word_tokens if not w in stop_words] 
-    final = ' '.join(filtered_sent)
-    return final
 
 
 
@@ -139,7 +145,7 @@ else:
     format = "%Y-%m-%d %H:%M:%S"
     now_utc = datetime.now(timezone('GMT'))
     now_local = now_utc.astimezone(get_localzone())
-    print("Program started at",now_local.strftime(format))
+    print("Program started at",now_local.strftime(format),"\n\n")
     total = end -  begin
     for i in range(begin,end):
         t = threading.Thread(target=create_df,args=(i,total))
@@ -149,10 +155,13 @@ else:
             avail = psutil.virtual_memory().available >> 20
             time.sleep(0.1)
 
-    while threading.activeCount() > 3:
-        time.sleep(.5)
-        print("wait till all threads sync data","." * 30,end='\r')
+
+    print("wait till all threads sync data","." * 30)
+    time.sleep(180)
     data.to_csv(name_to_save)
+    now_utc = datetime.now(timezone('GMT'))
+    now_local = now_utc.astimezone(get_localzone())
+    print("Program Ended at",now_local.strftime(format),"\n\n")
     print("data saved if program is still runnning close with CTRL + C.","." * 30)
 
 
