@@ -26,14 +26,13 @@ import random
 warnings.filterwarnings("ignore")
 
 
-#nltk.download('stopwords')
-#nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('punkt')
 stop_words = set(stopwords.words('english')) 
 h = html2text.HTML2Text()
 h.ignore_links=True
 pd.low_memory=False
-df = pd.read_csv("URL Classification.csv")
-df = df.drop('1',axis=1)
+df = pd.read_csv("sample_data.csv")
 df.columns=['url','category']
 data = pd.DataFrame(columns=['url','category','text'])
 data.loc[1] = ['url','cat','text']
@@ -146,7 +145,7 @@ else:
         t = threading.Thread(target=create_df,args=(i,total))
         t.start()
         avail = psutil.virtual_memory().available >> 20
-        while threading.activeCount() > 50 or avail < 300 :
+        while threading.activeCount() > 20 or avail < 300 :
             avail = psutil.virtual_memory().available >> 20
             time.sleep(0.1)
 
@@ -160,6 +159,4 @@ else:
 
 
 
-
-    
 
